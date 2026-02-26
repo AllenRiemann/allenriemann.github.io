@@ -1,8 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
     <title>俄罗斯方块</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -114,7 +116,7 @@
             </div>
         </div>
 
-        <!-- 移动端控制按钮 -->
+        <!-- 移动端虚拟操作键 -->
         <div class="mobile-controls">
             <div></div>
             <button id="rotate-btn" class="mobile-btn">
@@ -404,7 +406,7 @@
             
             reset() {
                 if (this.gameInterval) {
-                    clearInterval(this.this.gameInterval);
+                    clearInterval(this.gameInterval);
                 }
                 this.createBoard();
                 this.score = 0;
@@ -454,13 +456,36 @@
                     }
                 });
                 
-                // 按钮控制
+                // 虚拟按键控制
                 document.getElementById('start-btn').addEventListener('click', () => this.start());
                 document.getElementById('pause-btn').addEventListener('click', () => this.pause());
                 document.getElementById('left-btn').addEventListener('click', () => this.movePiece(-1, 0));
                 document.getElementById('right-btn').addEventListener('click', () => this.movePiece(1, 0));
                 document.getElementById('down-btn').addEventListener('click', () => this.movePiece(0, 1));
                 document.getElementById('rotate-btn').addEventListener('click', () => this.rotatePiece());
+                
+                // 触摸长按加速下降
+                let downPressTimer = null;
+                const downBtn = document.getElementById('down-btn');
+                
+                downBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    downPressTimer = setInterval(() => {
+                        this.movePiece(0, 1);
+                    }, 50);
+                });
+                
+                downBtn.addEventListener('touchend', () => {
+                    if (downPressTimer) {
+                        clearInterval(downPressTimer);
+                        downPressTimer = null;
+                    }
+                });
+                
+                // 防止触摸时页面滚动
+                document.querySelector('.mobile-controls').addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
             }
         }
         
@@ -470,4 +495,3 @@
         });
     </script>
 </body>
-</html>
