@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<!-- 调整缩放比例，适配放大后的界面 -->
-<meta name="viewport" content="width=device-width, initial-scale=0.85, user-scalable=no">
+<!-- 进一步降低缩放比例，适配更大界面 -->
+<meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no">
 <title>AZ Tetris Game</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto}
@@ -16,17 +16,17 @@ body{
   justify-content:center;
   align-items:flex-start;
   min-height:100vh;
-  padding:4px 4px 0; /* 适度增大页面内边距 */
+  padding:5px 5px 0; /* 适度增大页面内边距 */
   height:100vh;
   overflow:hidden;
 }
-/* 整体游戏容器放大 */
+/* 整体游戏容器大幅放大 */
 .game{
   width:100%;
-  max-width:320px; /* 从280px→320px，核心放大 */
+  max-width:350px; /* 从320px→350px，核心放大 */
   background:#1c1c1e;
-  border-radius:12px; /* 适配大尺寸的圆角 */
-  padding:8px; /* 增大容器内边距 */
+  border-radius:14px; /* 适配大尺寸的圆角 */
+  padding:10px; /* 增大容器内边距 */
 }
 /* 顶部标题+分数容器 */
 .game-header{
@@ -34,23 +34,23 @@ body{
   justify-content:space-between;
   align-items:center;
   width:100%;
-  margin-bottom:5px; /* 增大间距 */
+  margin-bottom:6px; /* 增大间距 */
   line-height:1;
 }
 .game-title{
   color:white;
-  font-size:18px; /* 放大标题字体 */
+  font-size:20px; /* 进一步放大标题字体 */
   font-weight:600;
 }
 .score{
   color:white;
-  font-size:16px; /* 放大分数字体 */
+  font-size:18px; /* 进一步放大分数字体 */
 }
 /* 游戏棋盘容器 */
 #board-container {
   width: 100%;
   position: relative;
-  margin-bottom:5px; /* 增大间距 */
+  margin-bottom:6px; /* 增大间距 */
 }
 /* 正方形网格棋盘（同步放大比例） */
 #board{
@@ -85,19 +85,19 @@ body{
 .btn-row-1, .btn-row-2 {
   display:grid;
   grid-template-columns: repeat(3, 1fr);
-  gap:8px; /* 增大按钮间距，避免误触 */
-  margin-bottom:5px; /* 增大间距 */
+  gap:10px; /* 进一步增大按钮间距 */
+  margin-bottom:6px; /* 增大间距 */
 }
-/* 核心：按钮大幅放大，极致提升触摸体验 */
+/* 核心：按钮同步大幅放大 */
 button{
-  padding:12px 0; /* 大幅增加上下内边距，按钮更高 */
-  font-size:18px; /* 放大按钮字体，更易识别 */
+  padding:14px 0; /* 大幅增加上下内边距，按钮更高 */
+  font-size:20px; /* 进一步放大按钮字体 */
   border:none;
-  border-radius:10px; /* 适配大按钮的圆角 */
+  border-radius:12px; /* 适配大按钮的圆角 */
   background:#007aff;
   color:white;
   width:100%;
-  max-width:85px; /* 大幅增大按钮宽度 */
+  max-width:95px; /* 进一步增大按钮宽度 */
   margin:0 auto;
   cursor:pointer;
   line-height:1;
@@ -116,9 +116,9 @@ button:active{opacity:0.7}
   transform:translate(-50%,-50%);
   background:rgba(0,0,0,0.85);
   color:white;
-  padding:15px 20px; /* 增大内边距 */
-  border-radius:10px;
-  font-size:18px; /* 放大提示字体 */
+  padding:18px 22px; /* 增大内边距 */
+  border-radius:12px;
+  font-size:20px; /* 放大提示字体 */
   display:none;
   z-index:10;
 }
