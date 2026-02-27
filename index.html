@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="viewport" content="width=device-width, initial-scale=0.9, user-scalable=no">
+<!-- 调整缩放比例，适配放大后的界面 -->
+<meta name="viewport" content="width=device-width, initial-scale=0.85, user-scalable=no">
 <title>AZ Tetris Game</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto}
@@ -15,39 +16,43 @@ body{
   justify-content:center;
   align-items:flex-start;
   min-height:100vh;
-  padding:3px 3px 0;
+  padding:4px 4px 0; /* 适度增大页面内边距 */
   height:100vh;
   overflow:hidden;
 }
+/* 整体游戏容器放大 */
 .game{
   width:100%;
-  max-width:280px;
+  max-width:320px; /* 从280px→320px，核心放大 */
   background:#1c1c1e;
-  border-radius:10px;
-  padding:6px;
+  border-radius:12px; /* 适配大尺寸的圆角 */
+  padding:8px; /* 增大容器内边距 */
 }
+/* 顶部标题+分数容器 */
 .game-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
   width:100%;
-  margin-bottom:3px;
+  margin-bottom:5px; /* 增大间距 */
   line-height:1;
 }
 .game-title{
   color:white;
-  font-size:14px;
+  font-size:18px; /* 放大标题字体 */
   font-weight:600;
 }
 .score{
   color:white;
-  font-size:12px;
+  font-size:16px; /* 放大分数字体 */
 }
+/* 游戏棋盘容器 */
 #board-container {
   width: 100%;
   position: relative;
-  margin-bottom:3px;
+  margin-bottom:5px; /* 增大间距 */
 }
+/* 正方形网格棋盘（同步放大比例） */
 #board{
   display:grid;
   grid-template-columns:repeat(10,1fr);
@@ -58,12 +63,14 @@ body{
   aspect-ratio: 10/20; 
   border:1px solid #444;
 }
+/* 正方形格子 */
 .cell{
   background:#3a3a3c;
   border-radius:1px;
   aspect-ratio: 1/1;
   width: 100%;
 }
+/* 方块颜色 */
 .cell.I{background:#4cc9f0}
 .cell.J{background:#4361ee}
 .cell.L{background:#f77f00}
@@ -71,25 +78,26 @@ body{
 .cell.S{background:#06d6a0}
 .cell.T{background:#7209b7}
 .cell.Z{background:#f72585}
+/* 控制按钮区域 */
 .ctrl{
   width:100%;
 }
 .btn-row-1, .btn-row-2 {
   display:grid;
   grid-template-columns: repeat(3, 1fr);
-  gap:5px;
-  margin-bottom:3px;
+  gap:8px; /* 增大按钮间距，避免误触 */
+  margin-bottom:5px; /* 增大间距 */
 }
-/* 核心调整：按钮尺寸调大，提升触摸体验 */
+/* 核心：按钮大幅放大，极致提升触摸体验 */
 button{
-  padding:10px 0; /* 上下内边距增大，按钮更高 */
-  font-size:16px; /* 字体放大，更清晰 */
+  padding:12px 0; /* 大幅增加上下内边距，按钮更高 */
+  font-size:18px; /* 放大按钮字体，更易识别 */
   border:none;
-  border-radius:8px; /* 圆角适配大按钮 */
+  border-radius:10px; /* 适配大按钮的圆角 */
   background:#007aff;
   color:white;
   width:100%;
-  max-width:75px; /* 按钮宽度显著增大 */
+  max-width:85px; /* 大幅增大按钮宽度 */
   margin:0 auto;
   cursor:pointer;
   line-height:1;
@@ -100,6 +108,7 @@ button:active{opacity:0.7}
 #reset{background:#ff3b30}
 #pause{background:#f59e0b}
 #resume{background:#10b981;display:none}
+/* 游戏结束提示同步放大 */
 #over{
   position:fixed;
   top:50%;
@@ -107,9 +116,9 @@ button:active{opacity:0.7}
   transform:translate(-50%,-50%);
   background:rgba(0,0,0,0.85);
   color:white;
-  padding:12px 18px;
-  border-radius:8px;
-  font-size:16px;
+  padding:15px 20px; /* 增大内边距 */
+  border-radius:10px;
+  font-size:18px; /* 放大提示字体 */
   display:none;
   z-index:10;
 }
@@ -134,7 +143,7 @@ button:active{opacity:0.7}
     </div>
     <div class="btn-row-2">
       <button onclick="start()" id="reset">Reset</button>
-      <button id="downBtn" onclick="speedUpFall()">↓</button> <!-- 点击触发加速 -->
+      <button id="downBtn" onclick="speedUpFall()">↓</button>
       <button onclick="togglePause()" id="pause">⏸️</button>
       <button onclick="togglePause()" id="resume">▶️</button>
     </div>
@@ -182,10 +191,9 @@ function initBoard() {
   }
 }
 
-// 生成随机方块
+// 生成随机方块（新方块恢复默认速度）
 function generateRandomPiece() {
-  // 生成新方块前，强制恢复基础默认速度（核心逻辑）
-  currentFallSpeed = baseFallSpeed;
+  currentFallSpeed = baseFallSpeed; // 核心：恢复默认速度
   const shapeIndex = Math.floor(Math.random() * SHAPES.length);
   const shape = SHAPES[shapeIndex];
   const color = COLOR_CLASSES[shapeIndex];
@@ -256,7 +264,7 @@ function lockPiece() {
   }
   
   clearLines();
-  // 生成新方块（内部会恢复默认速度）
+  // 生成新方块（自动恢复默认速度）
   currentPiece = generateRandomPiece();
   
   if (!isValidPosition(currentPiece.shape)) {
@@ -327,10 +335,10 @@ function rotate() {
   }
 }
 
-// ========== 核心功能：点击下箭头加速（速度翻倍） ==========
+// 点击下箭头加速（速度翻倍）
 function speedUpFall() {
   if (!isRunning || isPaused) return;
-  // 点击一次，当前速度减半（即下落频率翻倍）
+  // 速度减半 = 下落频率翻倍
   currentFallSpeed = currentFallSpeed / 2;
   // 立即重启定时器，应用新速度
   restartFallTimer();
