@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<!-- 新增viewport适配微信浏览器 -->
 <meta name="viewport" content="width=device-width, initial-scale=0.9, user-scalable=no">
 <title>AZ Tetris Game</title>
 <style>
@@ -16,43 +15,39 @@ body{
   justify-content:center;
   align-items:flex-start;
   min-height:100vh;
-  padding:3px 3px 0; /* 极致缩小页面内边距 */
+  padding:3px 3px 0;
   height:100vh;
   overflow:hidden;
 }
-/* 整体游戏容器进一步缩小 */
 .game{
   width:100%;
-  max-width:280px; /* 从310px→280px，核心缩小 */
+  max-width:280px;
   background:#1c1c1e;
-  border-radius:10px; /* 缩小圆角 */
-  padding:6px; /* 缩小内边距 */
+  border-radius:10px;
+  padding:6px;
 }
-/* 顶部标题+分数容器 */
 .game-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
   width:100%;
-  margin-bottom:3px; /* 缩小间距 */
+  margin-bottom:3px;
   line-height:1;
 }
 .game-title{
   color:white;
-  font-size:14px; /* 缩小字体 */
+  font-size:14px;
   font-weight:600;
 }
 .score{
   color:white;
-  font-size:12px; /* 缩小字体 */
+  font-size:12px;
 }
-/* 游戏棋盘容器 */
 #board-container {
   width: 100%;
   position: relative;
-  margin-bottom:3px; /* 缩小间距 */
+  margin-bottom:3px;
 }
-/* 正方形网格棋盘（同步缩小比例） */
 #board{
   display:grid;
   grid-template-columns:repeat(10,1fr);
@@ -63,14 +58,12 @@ body{
   aspect-ratio: 10/20; 
   border:1px solid #444;
 }
-/* 正方形格子 */
 .cell{
   background:#3a3a3c;
   border-radius:1px;
   aspect-ratio: 1/1;
   width: 100%;
 }
-/* 方块颜色 */
 .cell.I{background:#4cc9f0}
 .cell.J{background:#4361ee}
 .cell.L{background:#f77f00}
@@ -78,26 +71,25 @@ body{
 .cell.S{background:#06d6a0}
 .cell.T{background:#7209b7}
 .cell.Z{background:#f72585}
-/* 控制按钮区域 */
 .ctrl{
   width:100%;
 }
 .btn-row-1, .btn-row-2 {
   display:grid;
   grid-template-columns: repeat(3, 1fr);
-  gap:5px; /* 合理间距，适配小按钮 */
-  margin-bottom:3px; /* 缩小间距 */
+  gap:5px;
+  margin-bottom:3px;
 }
-/* 按钮尺寸同步缩小（仍保证触摸面积） */
+/* 核心调整：按钮尺寸调大，提升触摸体验 */
 button{
-  padding:7px 0; /* 适度调整内边距 */
-  font-size:14px; /* 保持字体清晰 */
+  padding:10px 0; /* 上下内边距增大，按钮更高 */
+  font-size:16px; /* 字体放大，更清晰 */
   border:none;
-  border-radius:7px; /* 适配小按钮的圆角 */
+  border-radius:8px; /* 圆角适配大按钮 */
   background:#007aff;
   color:white;
   width:100%;
-  max-width:62px; /* 从70px→62px，缩小按钮 */
+  max-width:75px; /* 按钮宽度显著增大 */
   margin:0 auto;
   cursor:pointer;
   line-height:1;
@@ -108,7 +100,6 @@ button:active{opacity:0.7}
 #reset{background:#ff3b30}
 #pause{background:#f59e0b}
 #resume{background:#10b981;display:none}
-/* 游戏结束提示同步缩小 */
 #over{
   position:fixed;
   top:50%;
@@ -116,9 +107,9 @@ button:active{opacity:0.7}
   transform:translate(-50%,-50%);
   background:rgba(0,0,0,0.85);
   color:white;
-  padding:12px 18px; /* 缩小内边距 */
-  border-radius:8px; /* 缩小圆角 */
-  font-size:16px; /* 缩小字体 */
+  padding:12px 18px;
+  border-radius:8px;
+  font-size:16px;
   display:none;
   z-index:10;
 }
@@ -143,11 +134,7 @@ button:active{opacity:0.7}
     </div>
     <div class="btn-row-2">
       <button onclick="start()" id="reset">Reset</button>
-      <button id="downBtn" 
-        onclick="down()" 
-        ontouchstart="handleTouchStart()" 
-        ontouchend="handleTouchEnd()" 
-        ontouchcancel="handleTouchEnd()">↓</button>
+      <button id="downBtn" onclick="speedUpFall()">↓</button> <!-- 点击触发加速 -->
       <button onclick="togglePause()" id="pause">⏸️</button>
       <button onclick="togglePause()" id="resume">▶️</button>
     </div>
@@ -159,12 +146,12 @@ button:active{opacity:0.7}
 <script>
 // 游戏核心常量
 const COLS=10, ROWS=20;
-let board, score, fallInterval, fastFallInterval;
+let board, score;
 let currentPiece, currentX, currentY;
 let isRunning = false, isPaused = false;
-const normalFallSpeed = 800;
-const fastFallSpeed = 80;    
-let touchTimer = null;
+const baseFallSpeed = 800;  // 基础默认下落速度（固定值）
+let currentFallSpeed = baseFallSpeed; // 当前下落速度（可动态调整）
+let fallTimer = null;       // 唯一下落定时器
 
 // 7种方块形状
 const SHAPES = [
@@ -197,6 +184,8 @@ function initBoard() {
 
 // 生成随机方块
 function generateRandomPiece() {
+  // 生成新方块前，强制恢复基础默认速度（核心逻辑）
+  currentFallSpeed = baseFallSpeed;
   const shapeIndex = Math.floor(Math.random() * SHAPES.length);
   const shape = SHAPES[shapeIndex];
   const color = COLOR_CLASSES[shapeIndex];
@@ -267,11 +256,14 @@ function lockPiece() {
   }
   
   clearLines();
+  // 生成新方块（内部会恢复默认速度）
   currentPiece = generateRandomPiece();
   
   if (!isValidPosition(currentPiece.shape)) {
     gameOver();
   }
+  // 重新启动定时器（使用恢复后的默认速度）
+  restartFallTimer();
 }
 
 // 消除满行并更新分数
@@ -318,7 +310,7 @@ function down() {
     currentY++;
     draw();
   } else {
-    lockPiece();
+    lockPiece(); // 落到底后固定方块，生成新方块（恢复默认速度）
   }
 }
 
@@ -335,22 +327,22 @@ function rotate() {
   }
 }
 
-// 长按加速逻辑
-function handleTouchStart() {
+// ========== 核心功能：点击下箭头加速（速度翻倍） ==========
+function speedUpFall() {
   if (!isRunning || isPaused) return;
-  touchTimer = setTimeout(() => {
-    clearInterval(fallInterval);
-    fastFallInterval = setInterval(down, fastFallSpeed);
-    down();
-  }, 300);
+  // 点击一次，当前速度减半（即下落频率翻倍）
+  currentFallSpeed = currentFallSpeed / 2;
+  // 立即重启定时器，应用新速度
+  restartFallTimer();
+  // 点击后立即下落一次，提升响应感
+  down();
 }
 
-function handleTouchEnd() {
-  if (!isRunning || isPaused) return;
-  clearTimeout(touchTimer);
-  clearInterval(fastFallInterval);
+// 重启下落定时器（统一管理，避免叠加）
+function restartFallTimer() {
+  clearInterval(fallTimer);
   if (isRunning && !isPaused) {
-    fallInterval = setInterval(down, normalFallSpeed);
+    fallTimer = setInterval(down, currentFallSpeed);
   }
 }
 
@@ -363,14 +355,11 @@ function togglePause() {
   const resumeBtn = document.getElementById('resume');
   
   if (isPaused) {
-    clearInterval(fallInterval);
-    clearInterval(fastFallInterval);
-    clearTimeout(touchTimer);
+    clearInterval(fallTimer);
     pauseBtn.style.display = 'none';
     resumeBtn.style.display = 'block';
   } else {
-    clearInterval(fastFallInterval);
-    fallInterval = setInterval(down, normalFallSpeed);
+    restartFallTimer(); // 恢复时用当前速度（暂停前的速度）
     pauseBtn.style.display = 'block';
     resumeBtn.style.display = 'none';
     draw();
@@ -380,9 +369,7 @@ function togglePause() {
 // 游戏结束
 function gameOver() {
   isRunning = false;
-  clearInterval(fallInterval);
-  clearInterval(fastFallInterval);
-  clearTimeout(touchTimer);
+  clearInterval(fallTimer);
   document.getElementById('final').textContent = score;
   document.getElementById('over').style.display = 'block';
   
@@ -393,11 +380,11 @@ function gameOver() {
 
 // 重置游戏逻辑
 function start() {
-  clearInterval(fallInterval);
-  clearInterval(fastFallInterval);
-  clearTimeout(touchTimer);
+  clearInterval(fallTimer);
   
+  // 重置状态，恢复基础速度
   score = 0;
+  currentFallSpeed = baseFallSpeed;
   isRunning = true;
   isPaused = false;
   
@@ -409,8 +396,7 @@ function start() {
   initBoard();
   currentPiece = generateRandomPiece();
   
-  fallInterval = setInterval(down, normalFallSpeed);
-  
+  restartFallTimer();
   draw();
 }
 
@@ -422,22 +408,11 @@ document.addEventListener('keydown', (e) => {
     case 'ArrowLeft': left(); break;
     case 'ArrowRight': right(); break;
     case 'ArrowDown': 
-      clearInterval(fallInterval);
-      fastFallInterval = setInterval(down, fastFallSpeed);
-      down();
+      // 电脑端按下下箭头也触发速度翻倍
+      speedUpFall();
       break;
     case 'ArrowUp': rotate(); break;
     case ' ': togglePause(); e.preventDefault(); break;
-  }
-});
-
-// 电脑端松开下箭头恢复正常下落
-document.addEventListener('keyup', (e) => {
-  if (e.key === 'ArrowDown') {
-    clearInterval(fastFallInterval);
-    if (isRunning && !isPaused) {
-      fallInterval = setInterval(down, normalFallSpeed);
-    }
   }
 });
 
